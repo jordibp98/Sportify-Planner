@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* aqui pondré propiedades de css si quiero y la directiva @apply de tailwind para agrupar clases, aunque en APP.vue se puede poner en la etiqueta style*/

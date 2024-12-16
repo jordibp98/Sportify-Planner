@@ -1,10 +1,11 @@
 <template>
   <div class="p-4">
-    <!-- Títol -->
+    <!-- Títol de la pàgina -->
     <h1 class="text-2xl font-bold mb-4">Manage Competitions</h1>
 
     <!-- Formulari per afegir/editar curses -->
     <form @submit.prevent="editingIndex === null ? addCompetition() : saveCompetition()" class="mb-6">
+      <!-- Input per a la distància -->
       <div class="mb-4">
         <label for="distance" class="block font-medium mb-2">Distance (km):</label>
         <input
@@ -17,6 +18,7 @@
         />
       </div>
 
+      <!-- Input per a l'augment de desnivell -->
       <div class="mb-4">
         <label for="elevation" class="block font-medium mb-2">Elevation (m):</label>
         <input
@@ -29,6 +31,7 @@
         />
       </div>
 
+      <!-- Select per al tipus de competició -->
       <div class="mb-4">
         <label for="terrain" class="block font-medium mb-2">Type of Competition:</label>
         <select
@@ -45,6 +48,7 @@
         </select>
       </div>
 
+      <!-- Input per l'URL de la competició (opcional) -->
       <div class="mb-4">
         <label for="url" class="block font-medium mb-2">Competition URL (Optional):</label>
         <input
@@ -56,6 +60,7 @@
         />
       </div>
 
+      <!-- Input per a les notes addicionals -->
       <div class="mb-4">
         <label for="notes" class="block font-medium mb-2">Notes:</label>
         <textarea
@@ -66,154 +71,119 @@
         ></textarea>
       </div>
 
+      <!-- Botó per afegir o desar la competició -->
       <button type="submit" class="btn">
         {{ editingIndex === null ? "Add Competition" : "Save Changes" }}
       </button>
     </form>
 
-    <!-- Llista de curses -->
+    <!-- Llista de competicions -->
     <h2 class="text-xl font-semibold mb-4">Competitions</h2>
     <ul>
-      <li v-for="(comp, index) in competitions" :key="index" class="mb-4">
+      <li v-for="(comp, index) in competitions" :key="comp.id" class="mb-4">
         <div class="border p-4">
           <p><strong>Distance:</strong> {{ comp.distance }} km</p>
           <p><strong>Elevation:</strong> {{ comp.elevation }} m</p>
           <p><strong>Type:</strong> {{ comp.terrain }}</p>
           <p><strong>Notes:</strong> {{ comp.notes }}</p>
           <p v-if="comp.url"><strong>URL:</strong> <a :href="comp.url" target="_blank">{{ comp.url }}</a></p>
+          <!-- Botons per editar o eliminar -->
           <div class="flex gap-2 mt-2">
             <button @click="editCompetition(index)" class="btn">Edit</button>
-            <button @click="deleteCompetition(index)" class="btn bg-red-500 hover:bg-red-600">Delete</button>
+            <button @click="deleteCompetition(comp.id)" class="btn bg-red-500 hover:bg-red-600">Delete</button>
           </div>
-
-          <!-- Botó per suggerir exercicis -->
-          <button 
-            v-if="!comp.suggestionsShown"
-            @click="suggestExercises(comp, index)" 
-            class="btn bg-secondary mt-2"
-          >
-            Suggest Exercises
-          </button>
-
-          <!-- Botó per amagar els exercicis -->
-          <button 
-            v-if="comp.suggestionsShown"
-            @click="hideExercises(comp, index)"
-            class="btn bg-secondary mt-2"
-          >
-            Hide Exercises
-          </button>
-
-          <!-- Exercicis suggerits -->
-          <ul v-if="comp.suggestions?.length && comp.suggestionsShown">
-            <li v-for="(ex, idx) in comp.suggestions" :key="idx">
-              {{ ex }}
-            </li>
-          </ul>
         </div>
       </li>
     </ul>
-    <!-- Botó per anar amunt -->
-    <button 
+
+        <!-- Botó per anar amunt v-show="window.scrollY > 100"  -->
+        <button 
       @click="scrollToTop"
-      class="fixed bottom-4 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700">
+      class="fixed bottom-16 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700">
       ↑
     </button>
+
   </div>
 </template>
 
+
 <script>
+import { getCompetitions, addCompetition, updateCompetition, deleteCompetition } from "../firebase";
+
 export default {
   data() {
     return {
+      // Object que emmagatzema la competició actual
       competition: {
-        distance: null,
-        elevation: null,
-        terrain: "road",
-        notes: "",
-        url: "", // Afegit per la URL
+        distance: null,  // Distància en km
+        elevation: null, // Desnivell acumulat en metres
+        terrain: "road", // Tipus de cursa (per defecte "road")
+        notes: "",       // Notes addicionals
+        url: "",         // URL de la competició (opcional)
       },
-      competitions: [],
-      editingIndex: null, // Índex de l'element que s'està editant
+      competitions: [], // Array per emmagatzemar totes les competicions recuperades
+      editingIndex: null, // Índex per saber quina competició estem editant
     };
   },
   methods: {
-    // Afegeix una nova competició
-    addCompetition() {
-      const newCompetition = { ...this.competition };
-      newCompetition.suggestionsShown = false; // Inicia sense mostrar suggeriments
-      this.competitions.push(newCompetition);
-      this.resetForm();
+    // Funció per recuperar totes les competicions des de Firebase
+    async fetchCompetitions() {
+      const competitionsData = await getCompetitions(); // Obtenim les competicions de Firebase
+      this.competitions = Object.keys(competitionsData).map(key => ({
+        id: key,               // Afegim l'ID de la competició
+        ...competitionsData[key], // Afegim la resta de les dades de la competició
+      }));
+    },
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,          // posició superior de la pàgina
+        behavior: "smooth" // Activa el desplaçament suau
+      });
     },
 
-    // Desa els canvis d'una competició editada
-    saveCompetition() {
-      const updatedCompetition = { ...this.competition };
-      updatedCompetition.suggestionsShown = false; // Inicia sense suggeriments
-      this.competitions.splice(this.editingIndex, 1, updatedCompetition);
-      this.resetForm();
+    // Funció per afegir una nova competició a Firebase
+    async addCompetition() {
+      await addCompetition(this.competition);  // Afegim la competició a Firebase
+      this.fetchCompetitions();                // Actualitzem la llista de competicions
+      this.resetForm();                        // Restablim el formulari
     },
 
-    // Genera suggeriments personalitzats d'exercicis
-    suggestExercises(competition, index) {
-      const suggestions = [];
-
-      // Generar exercicis basats en la distància
-      if (competition.distance <= 10) {
-        suggestions.push("Sprints", "Intervals", "Core Strength");
-      } else if (competition.distance <= 42) {
-        suggestions.push("Long runs", "Tempo runs", "Strength training");
-      } else {
-        suggestions.push("Hill repeats", "Back-to-back long runs", "Recovery workouts");
-      }
-
-      // Afegir exercicis per altitud
-      if (competition.elevation > 500) {
-        suggestions.push("Step-ups", "Weighted squats", "Hiking");
-      }
-
-      // Afegir exercicis per tipus de terreny
-      if (competition.terrain === "trail" || competition.terrain === "ultratrail") {
-        suggestions.push("Trail running drills", "Ankle stability exercises");
-      }
-
-      if (competition.terrain === "triathlon") {
-        suggestions.push("Swim intervals", "Bike hill climbs", "Brick workouts");
-      }
-
-      competition.suggestions = suggestions;
-      competition.suggestionsShown = true; // Marca que els suggeriments s'han mostrat
-      this.$set(this.competitions, index, competition); // Actualitza la competició amb els suggeriments
+    // Funció per desar els canvis quan editem una competició existent
+    async saveCompetition() {
+      const competitionId = this.competitions[this.editingIndex].id; // Obtenim l'ID de la competició a editar
+      await updateCompetition(competitionId, this.competition); // Actualitzem la competició a Firebase
+      this.fetchCompetitions(); // Actualitzem la llista de competicions
+      this.resetForm();         // Restablim el formulari
     },
 
-    // Amaga els exercicis suggerits
-    hideExercises(competition, index) {
-      competition.suggestionsShown = false;
-      this.$set(this.competitions, index, competition); // Actualitza l'estat per amagar-los
-    },
-
-    // Edita una competició existent
+    // Funció per editar una competició existent
     editCompetition(index) {
-      this.competition = { ...this.competitions[index] };
-      this.editingIndex = index;
+      this.competition = { ...this.competitions[index] }; // Copiamos la competició per poder editar-la
+      this.editingIndex = index; // Guardem l'índex de la competició que estem editant
     },
 
-    // Elimina una competició
-    deleteCompetition(index) {
-      this.competitions.splice(index, 1);
+    // Funció per eliminar una competició
+    async deleteCompetition(id) {
+      await deleteCompetition(id); // Eliminem la competició de Firebase
+      this.fetchCompetitions();     // Actualitzem la llista de competicions
     },
 
-    // Restableix el formulari
+    // Funció per restablir el formulari a l'estat inicial
     resetForm() {
-      this.competition = { distance: null, elevation: null, terrain: "road", notes: "", url: "" };
-      this.editingIndex = null;
+      this.competition = { distance: null, elevation: null, terrain: "road", notes: "", url: "" }; // Restableix el formulari
+      this.editingIndex = null; // Restableix l'índex d'edició
     },
+  },
+  created() {
+    // Quan el component es carrega, recuperem les competicions de Firebase
+    this.fetchCompetitions();
   },
 };
 </script>
 
+
 <style scoped>
-/* Estils per a Manage Competitions */
+ 
 .btn {
   background-color: #3b82f6;
   color: white;
@@ -222,25 +192,16 @@ export default {
   text-align: center;
   transition: background-color 0.3s;
 }
-
 .btn:hover {
   background-color: #2563eb;
 }
-
-.btn.bg-red-500 {
+.bg-red-500 {
   background-color: #ef4444;
 }
-
-.btn.bg-red-500:hover {
+.bg-red-500:hover {
   background-color: #dc2626;
 }
-
-.bg-secondary {
-  background-color: #4caf50; /* Verd */
-  color: white;
-}
 </style>
-
 
 
 <!-- <template>

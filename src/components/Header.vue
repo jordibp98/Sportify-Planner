@@ -18,6 +18,8 @@
         >Training Plan</RouterLink>
         <!-- Enllaç a la pàgina de competicions -->
         <RouterLink to="/Competitions" class="hover:text-gray-200">Competitions</RouterLink>
+        <RouterLink to="/blog" class="hover:text-gray-200">Blog </RouterLink>
+
       </nav>
     </header>
   </template>

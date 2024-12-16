@@ -4,12 +4,14 @@
 
 /* Estils globals */
 body {
-  background-color: #f7fafc; /* Gris molt suau per tot el cos */
-  font-family: 'Arial', sans-serif; /* Tipus de lletra neta i senzilla */
+  background-color: #f7fafc; /* Gris  suau per tot el cos */
+  font-family: 'Arial', sans-serif; /*  */
   margin: 0;
   padding: 0;
-  color: #333; /* Text fosc per contrastar bé amb el fons clar */
+  color: #333; /* Text per contrastar bé amb el fons clar */
 }
+
+
 
 /* Capçalera (Header) */
 header {
@@ -19,11 +21,11 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Llei de la sombra per fer-la més destacada */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* sombra més destacada */
 }
 
 header img {
-  width: 60px; /* Ajustant la mida del logo */
+  width: 60px; /*  mida del logo */
   height: auto;
 }
 

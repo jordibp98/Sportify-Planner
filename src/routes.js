@@ -3,6 +3,9 @@ import Home from "./views/Home.vue"; // Importem les vistes
 import TrainingPlan from "./views/TrainingPlan.vue";
 // import Competitions from "./views/Competitions.vue";
 import ManageCompetition from "./views/ManageCompetition.vue";
+import NotFound from "./views/NotFound.vue";
+import Blog from "./views/Blog.vue";
+import Post from './views/Post.vue';
 
 
 const routes = [
@@ -20,6 +23,22 @@ const routes = [
     path: "/competitions", // Ruta per a les competicions
     name: "ManageCompetitions",
     component: ManageCompetition,
+  },
+  {
+    path: "/:pathMatch(.*)*", // Ruta per a qualsevol camí no definit
+    name: "NotFound",
+    component: NotFound,
+  },
+  { 
+    path: "/blog", 
+    name: "Blog", 
+    component: Blog 
+  },
+  { 
+    path: "/blog/:id", 
+    name: "Post",
+    component: Post, 
+    props: true,
   },
 ];
 

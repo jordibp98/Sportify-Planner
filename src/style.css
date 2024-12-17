@@ -11,6 +11,11 @@ body {
   color: #333; /* Text per contrastar bé amb el fons clar */
 }
 
+/* Marge de 15 */
+.custom-mb {
+    margin-bottom: 25px;
+  }
+  
 
 
 /* Capçalera (Header) */

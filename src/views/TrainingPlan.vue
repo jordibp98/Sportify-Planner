@@ -42,8 +42,9 @@
       </li>
     </ul>
     <button 
+      v-if="showButton"
       @click="scrollToTop"
-      class="fixed bottom-16 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700">
+      class="fixed bottom-16 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700 scroll-button">
       ↑
     </button>
   </div>
@@ -57,17 +58,39 @@ export default {
     const store = useWorkoutStore();
     // Carrega exercicis inicials
     store.fetchExercises();
-    return { store };
+    return { store
+    };
   },
+  data(){
+    return{showButton: false};
+  },
+  mounted() {
+    window.addEventListener("scroll", this.handleScroll);
+  },
+
   methods: {
     // Funció per fer scroll cap amunt 
     scrollToTop() {
       window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+        top: 0,          // posició superior de la pàgina
+        behavior: "smooth" // Activa el desplaçament suau
       });
     },
+    handleScroll(){ // Verificar si estamos al final de la página
+              const scrollPosition = window.scrollY + window.innerHeight;
+              const documentHeight = document.documentElement.scrollHeight;
+          if (scrollPosition >= documentHeight-300) {
+          this.showButton = true;
+         // Mostrar el botón si estamos en el fondo
+          } else {
+            this.showButton = false; // Ocultar el botón si no estamos en el fondo
+            };
+      },
   },
+  beforeDestroy() {
+      // Limpiar el evento scroll cuando el componente se destruya
+      window.removeEventListener("scroll", this.handleScroll);
+      },
 };
 </script>
 

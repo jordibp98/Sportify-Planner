@@ -44,7 +44,7 @@
   </script>
   
   <style scoped>
-  /* Estils per al component de Workout */
+  /* Estils component de Workout */
   select {
     margin: 10px 0;
   }

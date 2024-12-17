@@ -98,16 +98,17 @@
 
         <!-- Botó per anar amunt v-show="window.scrollY > 100"  -->
         <button 
+      v-if="showButton"
       @click="scrollToTop"
-      class="fixed bottom-16 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700">
+      class="fixed bottom-16 right-4 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-700 scroll-button">
       ↑
     </button>
-
   </div>
 </template>
 
 
 <script>
+import { handleError } from "vue";
 import { getCompetitions, addCompetition, updateCompetition, deleteCompetition } from "../firebase";
 
 export default {
@@ -123,8 +124,13 @@ export default {
       },
       competitions: [], // Array per emmagatzemar totes les competicions recuperades
       editingIndex: null, // Índex per saber quina competició estem editant
+      showButton: false
     };
   },
+  mounted() {
+    window.addEventListener("scroll", this.handleScroll);
+  },
+
   methods: {
     // Funció per recuperar totes les competicions des de Firebase
     async fetchCompetitions() {
@@ -140,6 +146,17 @@ export default {
         behavior: "smooth" // Activa el desplaçament suau
       });
     },
+    handleScroll(){ // Verificar si estamos al final de la página
+              const scrollPosition = window.scrollY + window.innerHeight;
+              const documentHeight = document.documentElement.scrollHeight;
+          if (scrollPosition >= documentHeight-300) {
+          this.showButton = true;
+         // Mostrar el botón si estamos en el fondo
+          } else {
+            this.showButton = false; // Ocultar el botón si no estamos en el fondo
+            };
+      },
+     
 
     // Funció per afegir una nova competició a Firebase
     async addCompetition() {
@@ -174,6 +191,10 @@ export default {
       this.editingIndex = null; // Restableix l'índex d'edició
     },
   },
+  beforeDestroy() {
+      // Limpiar el evento scroll cuando el componente se destruya
+      window.removeEventListener("scroll", this.handleScroll);
+      },
   created() {
     // Quan el component es carrega, recuperem les competicions de Firebase
     this.fetchCompetitions();

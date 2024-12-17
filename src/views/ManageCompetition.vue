@@ -175,7 +175,7 @@ export default {
 
     // Funció per editar una competició existent
     editCompetition(index) {
-      this.competition = { ...this.competitions[index] }; // Copiamos la competició per poder editar-la
+      this.competition = { ...this.competitions[index] }; // Copiem la competició per poder editar-la
       this.editingIndex = index; // Guardem l'índex de la competició que estem editant
     },
 

@@ -94,7 +94,6 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Estils per personalitzar */
+<style >
 </style>
 
